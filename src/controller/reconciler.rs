@@ -509,27 +509,24 @@ async fn apply_stellar_node(
     if health_result.healthy && !node.spec.suspended {
         let stale_check = remediation::check_stale_node(node, health_result.ledger_sequence);
         if stale_check.is_stale && remediation::can_remediate(node) {
-            match stale_check.recommended_action {
-                remediation::RemediationLevel::Restart => {
-                    remediation::emit_remediation_event(
-                        client,
-                        node,
-                        remediation::RemediationLevel::Restart,
-                        "Stale ledger",
-                    )
-                    .await?;
-                    remediation::restart_pod(client, node).await?;
-                    remediation::update_remediation_state(
-                        client,
-                        node,
-                        stale_check.current_ledger,
-                        remediation::RemediationLevel::Restart,
-                        true,
-                    )
-                    .await?;
-                    return Ok(Action::requeue(Duration::from_secs(30)));
-                }
-                _ => {}
+            if stale_check.recommended_action == remediation::RemediationLevel::Restart {
+                remediation::emit_remediation_event(
+                    client,
+                    node,
+                    remediation::RemediationLevel::Restart,
+                    "Stale ledger",
+                )
+                .await?;
+                remediation::restart_pod(client, node).await?;
+                remediation::update_remediation_state(
+                    client,
+                    node,
+                    stale_check.current_ledger,
+                    remediation::RemediationLevel::Restart,
+                    true,
+                )
+                .await?;
+                return Ok(Action::requeue(Duration::from_secs(30)));
             }
         } else {
             remediation::update_remediation_state(

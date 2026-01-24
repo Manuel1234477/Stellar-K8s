@@ -18,15 +18,19 @@ Thank you for your interest in contributing to Stellar-K8s! This project aims to
    ```
 2. Run local checks:
    ```bash
-   cargo check --all-features
-   cargo test --all-features
+   # Comprehensive pre-push check
+   cargo fmt --all -- --check && \
+   cargo clippy --all-targets --all-features -- -D warnings && \
+   cargo test --all-features && \
+   cargo test --doc && \
+   cargo audit
    ```
 
 ## Coding Standards
 
 - **Formatting**: Always run `cargo fmt` before committing.
-- **Linting**: We use Clippy for linting. Ensure `cargo clippy --all-targets --all-features -- -D warnings` passes.
-- **Security**: All dependencies must be audited. Avoid using unmaintained or unsound crates.
+- **Linting**: We use Clippy for linting. Ensure `cargo clippy --all-targets --all-features -- -D warnings` passes. We follow a "zero-warning" policy for pushes to `main`.
+- **Security**: All dependencies must be audited. We resolve all `RUSTSEC` advisories immediately.
 - **Error Handling**: Use `thiserror` for library errors and `anyhow` for application-level logic. Prefer the `Result<T>` type defined in `src/error.rs`.
 
 ## Security Policy
@@ -37,12 +41,12 @@ We take security seriously. If you find a vulnerability (e.g., in a dependency o
 If a dependency scan fails due to a RUSTSEC advisory:
 1. Identify the crate and version causing the issue.
 2. Upgrade the dependency in `Cargo.toml`.
-3. If the vulnerability is in an internal transitive dependency, use `cargo tree -p <parent-crate> | grep <vulnerable-crate>` to find the source and upgrade the parent.
+3. If the vulnerability is in an internal transitive dependency, use `cargo tree -i <vulnerable-crate>` to find the source and upgrade the parent.
 
 ## Pull Request Process
 
 1. Create a new branch for your feature or fix.
-2. Ensure all tests pass, including the 38+ unit tests for `StellarNodeSpec` validation.
+2. Ensure all tests pass, including the 62+ unit tests for `StellarNodeSpec` validation.
 3. Update the `CHANGELOG.md` (if applicable).
 4. Submit your PR against the `develop` branch.
 
