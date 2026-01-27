@@ -84,7 +84,7 @@ impl Scheduler {
 
         if let Some(node) = best_node {
             info!("Binding pod {} to node {}", pod_name, node.name_any());
-            self.bind_pod(pod, &node).await?;
+            self.bind_pod(pod, node).await?;
         } else {
             warn!("No best node found for pod {}", pod_name);
         }
